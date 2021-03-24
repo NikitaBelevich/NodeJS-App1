@@ -15,7 +15,7 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`)
+    console.log(`Server running at http://${hostname}:${port}/`);
 });
 
 function getPage(pathToPage = '/', response) {
@@ -29,10 +29,14 @@ function getPage(pathToPage = '/', response) {
     }
 
     // console.log(pathToPage);
-    fs.readFile(pathToPage, (err, data) => {
+    fs.readFile(pathToPage, 'utf-8', (err, page) => {
         if (!err) {
-            response.statusCode = 200;
-            response.end(data);
+            fs.readFile('elements/menu.html', 'utf-8', (err, element) => {
+                if (err) throw err;
+                page = page.replace(/\{\{menu\}\}/g, element);
+                response.statusCode = 200;
+                response.end(page);
+            });
         } else {
             fs.readFile('pages/404.html', (err, data) => {
                 if (err) throw err;
