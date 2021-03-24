@@ -10,16 +10,22 @@ const hostname = '127.0.0.5';
 const port = 3005;
 
 const server = http.createServer((request, response) => {
-
     if (request.url == '/favicon.ico') return; //!!!
+    getPage(request.url, response);
+});
 
+server.listen(port, hostname, () => {
+    console.log(`Server running at http://${hostname}:${port}/`)
+});
+
+function getPage(pathToPage = '/', response) {
     response.setHeader('Content-Type', 'text/html');
-    let pathToPage = '';
-    if (request.url == '/') {
+    // let pathToPage = '';
+    if (pathToPage == '/') {
         pathToPage = 'index.html';
     } else {
         // A path with the .html
-        pathToPage = request.url.slice(1);
+        pathToPage = pathToPage.slice(1);
     }
 
     // console.log(pathToPage);
@@ -35,16 +41,8 @@ const server = http.createServer((request, response) => {
             });
         }
     });
-
-});
-
-server.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`)
-});
-
-
+}
   
-
 
 
 
