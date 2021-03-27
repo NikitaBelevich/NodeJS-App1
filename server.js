@@ -9,6 +9,8 @@ const url = require('url');
 const hostname = '127.0.0.5';
 const port = 3005;
 
+const regexpForImages = /\.jpg$|\.jpeg$|\.png$|\.svg$|\.webp$|\.gif$/;
+
 const server = http.createServer((request, response) => {
     if (request.url == '/favicon.ico') {
         sendFavicon(request.url, response);
@@ -17,6 +19,11 @@ const server = http.createServer((request, response) => {
         sendCSS(request.url, response);
     } else if (request.url.endsWith('.js')) {
         sendJS(request.url, response);
+    } else if (request.url.match(regexpForImages)) {
+        // If the URL has an image extension of the regexpForImage, then it's a request on an image
+        let extensionOfImg = request.url.match(regexpForImages)[0].slice(1);
+        extensionOfImg = (extensionOfImg == 'svg') ? 'svg+xml' : extensionOfImg;
+        sendImage(request.url, extensionOfImg, response);
     } else {
         sendPage(request.url, response);
     }
@@ -55,7 +62,6 @@ function sendPage(pathToPage = '/', response) {
         }
     });
 }
-  
 function sendCSS(pathToCSS, response) {
     fs.readFile(pathToCSS.slice(1), (err, cssFile) => {
         if (err) throw err;
@@ -78,6 +84,14 @@ function sendJS(pathToJS, response) {
         response.setHeader('Content-Type', 'application/javascript');
         response.statusCode = 200;
         response.end(jsFile);
+    });
+}
+function sendImage(pathToIMG, extension, response) {
+    fs.readFile(pathToIMG.slice(1), (err, imgFile) => {
+        if (err) throw err;
+        response.setHeader('Content-Type', `image/${extension}`);
+        response.statusCode = 200;
+        response.end(imgFile);
     });
 }
 
