@@ -10,15 +10,24 @@ const hostname = '127.0.0.5';
 const port = 3005;
 
 const server = http.createServer((request, response) => {
-    if (request.url == '/favicon.ico') return; //!!!
-    getPage(request.url, response);
+    if (request.url == '/favicon.ico') {
+        sendFavicon(request.url, response);
+    }
+    if (request.url.endsWith('.css')) {
+        sendCSS(request.url, response);
+    } else if (request.url.endsWith('.js')) {
+        sendJS(request.url, response);
+    } else {
+        sendPage(request.url, response);
+    }
+    
 });
 
 server.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
 });
 
-function getPage(pathToPage = '/', response) {
+function sendPage(pathToPage = '/', response) {
     response.setHeader('Content-Type', 'text/html');
     // let pathToPage = '';
     if (pathToPage == '/') {
@@ -47,6 +56,28 @@ function getPage(pathToPage = '/', response) {
     });
 }
   
-
-
+function sendCSS(pathToCSS, response) {
+    fs.readFile(pathToCSS.slice(1), (err, cssFile) => {
+        if (err) throw err;
+        response.setHeader('Content-Type', 'text/css');
+        response.statusCode = 200;
+        response.end(cssFile);
+    });
+}
+function sendFavicon(pathToFavicon, response) {
+    fs.readFile(pathToFavicon.slice(1), (err, favicon) => {
+        if (err) console.error('favicon.ico not found');
+        response.setHeader('Content-Type', 'image/x-icon');
+        response.statusCode = 200;
+        response.end(favicon);
+    });
+}
+function sendJS(pathToJS, response) {
+    fs.readFile(pathToJS.slice(1), (err, jsFile) => {
+        if (err) throw err;
+        response.setHeader('Content-Type', 'application/javascript');
+        response.statusCode = 200;
+        response.end(jsFile);
+    });
+}
 
