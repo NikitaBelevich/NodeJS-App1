@@ -25,3 +25,17 @@ body {
         max-height: 150px;
     }
 }
+
+.header-of-site {
+    &__menu {
+
+    }
+    &__menu-item {
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 1.2rem;
+    }
+    &__menu-item_active {
+        color: crimson;
+    }
+}
