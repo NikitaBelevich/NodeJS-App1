@@ -36,7 +36,6 @@ server.listen(port, hostname, () => {
 
 function sendPage(pathToPage = '/', response) {
     response.setHeader('Content-Type', 'text/html');
-    // let pathToPage = '';
     if (pathToPage == '/') {
         pathToPage = 'index.html';
     } else {
@@ -44,14 +43,24 @@ function sendPage(pathToPage = '/', response) {
         pathToPage = pathToPage.slice(1);
     }
 
-    // console.log(pathToPage);
-    fs.readFile(pathToPage, 'utf-8', (err, page) => {
+    fs.readFile(pathToPage, 'utf-8', (err, contentOfPage) => {
         if (!err) {
-            fs.readFile('elements/menu.html', 'utf-8', (err, element) => {
+            // If the template page is found, then we read and insert contentOfPage into it
+            fs.readFile('layouts/default.html', 'utf-8', (err, layout) => {
                 if (err) throw err;
-                page = page.replace(/\{\{menu\}\}/g, element);
-                response.statusCode = 200;
-                response.end(page);
+                layout = layout.replace(/\{\{get content\}\}/g, contentOfPage);
+                // Now we read a file that has the content of the menu
+                fs.readFile('elements/menu.html', 'utf-8', (err, menu) => {
+                    if (err) throw err;
+                    layout = layout.replace(/\{\{get menu\}\}/g, menu);
+                    // And the last reading is a file of the footer. The layout is formed
+                    fs.readFile('elements/footer.html', 'utf-8', (err, footer) => {
+                        if (err) throw err;
+                        layout = layout.replace(/\{\{get footer\}\}/g, footer);
+                        response.statusCode = 200;
+                        response.end(layout);
+                    });
+                });
             });
         } else {
             fs.readFile('pages/404.html', (err, data) => {
