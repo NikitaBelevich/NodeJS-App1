@@ -10,6 +10,7 @@ const hostname = '127.0.0.5';
 const port = 3005;
 
 const regexpForImages = /\.jpg$|\.jpeg$|\.png$|\.svg$|\.webp$|\.gif$/;
+const regexpForTitleOfAPage = /\{\{set title "(.*)"\}\}/;
 
 const server = http.createServer((request, response) => {
     if (request.url == '/favicon.ico') {
@@ -27,7 +28,6 @@ const server = http.createServer((request, response) => {
     } else {
         sendPage(request.url, response);
     }
-    
 });
 
 server.listen(port, hostname, () => {
@@ -49,6 +49,12 @@ function sendPage(pathToPage = '/', response) {
             fs.readFile('layouts/default.html', 'utf-8', (err, layout) => {
                 if (err) throw err;
                 layout = layout.replace(/\{\{get content\}\}/g, contentOfPage);
+                // Here we take a title of a page and insert it into our template
+                let titleOfPage = contentOfPage.match(regexpForTitleOfAPage);
+                if (titleOfPage) {
+                    layout = layout.replace(/\{\{get title\}\}/g, titleOfPage[1])
+                    layout = layout.replace(regexpForTitleOfAPage, '');
+                }
                 // Now we read a file that has the content of the menu
                 fs.readFile('elements/menu.html', 'utf-8', (err, menu) => {
                     if (err) throw err;
